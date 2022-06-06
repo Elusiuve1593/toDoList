@@ -35,8 +35,7 @@ import {TaskStatuses, TaskType} from './api/todolists-api'
 export type TasksStateType = {
     [key: string]: Array<TaskType>
 }
-
-
+let t = [1,3,4]
 function App() {
     const todolists = useSelector<AppRootStateType, Array<TodolistDomainType>>(state => state.todolists)
     const tasks = useSelector<AppRootStateType, TasksStateType>(state => state.tasks)
