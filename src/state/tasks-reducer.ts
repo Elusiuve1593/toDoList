@@ -64,7 +64,7 @@ export const tasksReducer = (state: TasksStateType = initialState, action: Actio
         }
         case 'REMOVE-TODOLIST': {
             const copyState = {...state};
-            delete copyState[action.id];
+            delete copyState[action.todolistId];
             return copyState;
         }
         case 'SET-TODOLISTS': {
@@ -136,7 +136,6 @@ export const changeTaskStatus = (todolistId: string, taskId: string, status: Tas
         const currentTask = tasksForClickedToDo.find((i) => {
             return i.id === taskId
         })
-        let d = {}
         if (currentTask) {
             const model: UpdateTaskModelType = {
                 title: currentTask.title,
