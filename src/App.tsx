@@ -12,9 +12,8 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import {Menu} from '@mui/icons-material';
 import {
-    addTodolistAC, addTodolistThunk,
-    changeTodolistFilterAC, changeTodolistTitle,
-    changeTodolistTitleAC,
+    addTodolistThunk,
+    changeTodolistFilterAC,
     FilterValuesType,
     removeToDoList,
     setTodoListsTHunk,
@@ -22,8 +21,10 @@ import {
 } from './state/todolists-reducer'
 import {addTaskThunk, changeTaskStatus, changeTaskTitleAC, removeTaskThunk,} from './state/tasks-reducer';
 import {useDispatch, useSelector} from 'react-redux';
-import {AppRootStateType} from './state/store';
+import {AppRootStateType, useAppSelector} from './state/store';
 import {TaskStatuses, TaskType} from './api/todolists-api'
+import {LinearProgress} from "@mui/material";
+import {RequestStatusType} from "./state/app-reducer";
 
 export type TasksStateType = {
     [key: string]: Array<TaskType>
@@ -32,7 +33,10 @@ export type TasksStateType = {
 function App() {
     const todolists = useSelector<AppRootStateType, Array<TodolistDomainType>>(state => state.todolists)
     const tasks = useSelector<AppRootStateType, TasksStateType>(state => state.tasks)
+    const status = useAppSelector(state => state.appReducer.status)
+
     const dispatch = useDispatch();
+
     useEffect(() => {
         dispatch(setTodoListsTHunk())
     }, [])
@@ -85,6 +89,7 @@ function App() {
                     <Button color="inherit">Login</Button>
                 </Toolbar>
             </AppBar>
+            <LinearProgress color="success"/>
             <Container fixed>
                 <Grid container style={{padding: '20px'}}>
                     <AddItemForm addItem={addTodolist}/>
