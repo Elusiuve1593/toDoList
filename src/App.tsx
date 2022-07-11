@@ -20,19 +20,19 @@ import {
     TodolistDomainType
 } from './state/todolists-reducer'
 import {addTaskThunk, changeTaskStatus, changeTaskTitleAC, removeTaskThunk,} from './state/tasks-reducer';
-import {useDispatch, useSelector} from 'react-redux';
-import {AppRootStateType, useAppSelector} from './state/store';
+import {useDispatch} from 'react-redux';
+import {useAppSelector} from './state/store';
 import {TaskStatuses, TaskType} from './api/todolists-api'
 import {LinearProgress} from "@mui/material";
-import {RequestStatusType} from "./state/app-reducer";
+import {ErrorSnackbar} from "./ErrorSnackBar/ErrorSnackBar";
 
 export type TasksStateType = {
     [key: string]: Array<TaskType>
 }
 
 function App() {
-    const todolists = useSelector<AppRootStateType, Array<TodolistDomainType>>(state => state.todolists)
-    const tasks = useSelector<AppRootStateType, TasksStateType>(state => state.tasks)
+    const todolists = useAppSelector<TodolistDomainType[]>(state => state.todolists)
+    const tasks = useAppSelector(state => state.tasks)
     const status = useAppSelector(state => state.appReducer.status)
 
     const dispatch = useDispatch();
@@ -78,6 +78,7 @@ function App() {
 
     return (
         <div className="App">
+            < ErrorSnackbar/>
             <AppBar position="static">
                 <Toolbar>
                     <IconButton edge="start" color="inherit" aria-label="menu">
@@ -89,7 +90,7 @@ function App() {
                     <Button color="inherit">Login</Button>
                 </Toolbar>
             </AppBar>
-            <LinearProgress color="success"/>
+            {status === 'loading' && <LinearProgress color="success"/>}
             <Container fixed>
                 <Grid container style={{padding: '20px'}}>
                     <AddItemForm addItem={addTodolist}/>
@@ -104,6 +105,7 @@ function App() {
                                         id={tl.id}
                                         title={tl.title}
                                         tasks={allTodolistTasks}
+                                        status={tl.status}
                                         removeTask={removeTask}
                                         changeFilter={changeFilter}
                                         addTask={addTask}

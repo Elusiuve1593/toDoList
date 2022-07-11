@@ -4,7 +4,7 @@ import {applyMiddleware, combineReducers,} from 'redux';
 import thunk from "redux-thunk";
 import {legacy_createStore as createStore} from 'redux'
 import {appReducer} from "./app-reducer";
-import {TypedUseSelectorHook, useSelector} from "react-redux";
+import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
 
 
 // объединяя reducer-ы с помощью combineReducers,

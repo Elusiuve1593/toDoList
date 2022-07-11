@@ -3,6 +3,8 @@ import {AddTodolistActionType, RemoveTodolistActionType, setTodoListsACType} fro
 import {TaskStatuses, TaskType, todolistsAPI, UpdateTaskModelType} from '../api/todolists-api'
 import {Dispatch} from "redux";
 import {AppRootStateType} from "./store";
+import {RequestStatusType, setAppStatus, setError} from "./app-reducer";
+import {AxiosError} from "axios";
 
 const initialState: TasksStateType = {
     /*"todolistId1": [
@@ -88,25 +90,29 @@ type ActionsType = RemoveTaskActionType
     | AddTodolistActionType
     | RemoveTodolistActionType
     | setTodoListsACType
-    | setTasksACType
+    | SetTasksACType
 
 export type RemoveTaskActionType = ReturnType<typeof removeTaskAC>
 export type AddTaskActionType = ReturnType<typeof addTaskAC>
 export type ChangeTaskStatusActionType = ReturnType<typeof changeTaskStatusAC>
 export type ChangeTaskTitleActionType = ReturnType<typeof changeTaskTitleAC>
-export type setTasksACType = ReturnType<typeof setTasksAC>
+export type SetTasksACType = ReturnType<typeof setTasksAC>
 
 export const removeTaskAC = (todolistId: string, taskId: string) => {
     return {type: 'REMOVE-TASK', taskId, todolistId} as const
 }
 
 export const removeTaskThunk = (todolistId: string, taskId: string) => {
-    return (dispatch: Dispatch) => (
+    return (dispatch: Dispatch) => {
+        dispatch(setAppStatus('loading'))
         todolistsAPI.deleteTask(todolistId, taskId)
             .then(res => [
-                dispatch(removeTaskAC(todolistId, taskId))
+                dispatch(removeTaskAC(todolistId, taskId)),
             ])
-    )
+            .finally(() => {
+                dispatch(setAppStatus('idle'))
+            })
+    }
 }
 
 export const addTaskAC = (task: TaskType) => {
@@ -115,10 +121,22 @@ export const addTaskAC = (task: TaskType) => {
 
 export const addTaskThunk = (todolistId: string, title: string) => {
     return (dispatch: Dispatch) => {
+        dispatch(setAppStatus('loading'))
         todolistsAPI.createTask(todolistId, title)
-            .then(res => {
-                const task = res.data.data.item
-                dispatch(addTaskAC(task))
+            .then(
+                res => {
+                    if (res.data.resultCode === 0) {
+                        const task = res.data.data.item
+                        dispatch(addTaskAC(task))
+                    } else {
+                        dispatch(setError(res.data.messages[0]))
+                    }
+                })
+            .catch((err: AxiosError) => {
+                dispatch(setError(err.message))
+            })
+            .finally(() => {
+                dispatch(setAppStatus('idle'))
             })
     }
 }
@@ -161,10 +179,12 @@ export const setTasksAC = (todolistId: string, tasks: TaskType[]) => {
 }
 export const fetchTasksTC = (todolistId: string) => {
     return (dispatch: Dispatch) => {
+        dispatch(setAppStatus('loading'))
         todolistsAPI.getTasks(todolistId)
             .then((res) => {
                 const tasks = res.data.items
                 dispatch(setTasksAC(todolistId, tasks))
+                dispatch(setAppStatus('succeeded'))
             })
     }
 }
